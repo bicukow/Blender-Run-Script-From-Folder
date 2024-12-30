@@ -1,0 +1,16 @@
+schema_version = "1.0.0"
+
+id = "blender_Run_Scripts_From_Folder"
+version = "0.0.1"
+name = "Run Scripts From Folder"
+tagline = "Execute script from specified folder"
+maintainer = "Alexander Bicukow <bicukow@gmail.com>"
+
+type = "add-on"
+tags = ["User Interface"]
+
+blender_version_min = "4.2.0"
+
+license = ["SPDX:GPL-3.0-or-later"]
+
+copyright = ["2024 Bicukow"]
