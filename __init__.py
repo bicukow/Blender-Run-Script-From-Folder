@@ -4,7 +4,7 @@ bl_info = {
     'author': 'bicukov',
     'license': 'GPL',
     'deps': '',
-    'version': (0, 0, 1),
+    'version': (0, 0, 2),
     'blender': (4, 3, 0),
     'location': 'Menu Search (F3) -> Run Script From Folder',
     'warning': 'First Folder in File Paths -> Script Drectories will be used for scripts look up',
@@ -12,16 +12,23 @@ bl_info = {
     'tracker_url': 'https://github.com/bicukow/Blender-Run-Script-From-Folder/issues',
     'link': '',
     'support': 'COMMUNITY',
-    'category': 'User Interface'
+    'category': 'System'
     }
 
 
 import bpy 
+import os
 from os.path import isfile, join
 from os import listdir
 
 #current_dir = bpy.data.filepath.replace(bpy.path.basename(bpy.data.filepath),'')
-folder_path = bpy.utils.script_paths_pref()[0]+'\\'
+folder_path = os.path.join(bpy.utils.script_paths_pref()[0], '')
+
+#validate folder
+if os.path.exists(folder_path):
+    pass
+else:
+    raise ValueError('Folder Path is not specified.')
 
 def update_filelist():
     allfiles_list = [f for f in listdir(folder_path) if isfile(join(folder_path, f))]
@@ -42,12 +49,12 @@ class RUNSCRIPTFROMFOLDER_OT_PopupMenu(bpy.types.Operator): # enum operator
     bl_idname = "wm.run_script_from_folder"
     
     preset_enum : bpy.props.EnumProperty(
-        name="execute",
+        name="Execute",
         description='Select a .py script',
         items = update_enum_items(update_filelist()) # dynamic 'items' list for enum operator
     )
     
-    def invoke(self, context, event):                # dynamic update filelist on invoke
+    def invoke(self, context, event): # dynamic update filelist on invoke
         wm = context.window_manager
         update_filelist()
         update_enum_items(update_filelist())
@@ -57,14 +64,18 @@ class RUNSCRIPTFROMFOLDER_OT_PopupMenu(bpy.types.Operator): # enum operator
         layout = self.layout
         layout.prop(self,'preset_enum')
            
-    def execute(self, context):                   # dynamic execute func for enum operator
+    def execute(self, context): # dynamic execute func for enum operator
         files_list = update_filelist()
-        for item,i in enumerate(files_list, start=1):
-            if self.preset_enum == str('OP' + str(item)):
-                filepath = folder_path + i
-                # bpy.data.texts.load(filepath)
-                exec(compile(open(filepath).read(), filepath, 'exec'))
-        
+        for index, file_name in enumerate(files_list, start=1):
+            if self.preset_enum == str('OP' + str(index)):
+                filepath = folder_path + file_name
+                # load a python script in Text Editor and launch it
+                loaded_text = bpy.data.texts.load(filepath)
+                override = bpy.context.copy()
+                override["edit_text"] =  bpy.data.texts[file_name]
+                with context.temp_override(**override):
+                    bpy.ops.text.run_script()
+                bpy.data.texts.remove(loaded_text)
         return {'FINISHED'}    
 
 classes = [RUNSCRIPTFROMFOLDER_OT_PopupMenu]
