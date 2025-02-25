@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "blender_Run_Scripts_From_Folder"
-version = "0.0.2"
+version = "0.0.6"
 name = "Run Scripts From Folder"
 tagline = "Execute script from specified folder"
 maintainer = "Alexander Bicukow <bicukow@gmail.com>"
